@@ -10,7 +10,8 @@ defmodule Realworld.Application do
 
     children = [
       Repo,
-      {Plug.Cowboy, scheme: :http, plug: Endpoint, options: [port: port]}
+      {Plug.Cowboy, scheme: :http, plug: Endpoint, options: [port: port]},
+      {AshAuthentication.Supervisor, otp_app: :realworld}
     ]
 
     Logger.info("Running Realworld.Endpoint with cowboy at port #{port}")
