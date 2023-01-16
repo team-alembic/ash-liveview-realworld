@@ -37,7 +37,8 @@ defmodule Realworld.MixProject do
   defp deps do
     [
       {:ash, "~> 2.5"},
-      {:elixir_sense, github: "elixir-lsp/elixir_sense", only: [:dev, :test]}
+      {:elixir_sense, github: "elixir-lsp/elixir_sense", only: [:dev, :test]},
+      {:ash_postgres, "~> 1.3"}
     ]
   end
 
