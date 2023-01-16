@@ -7,12 +7,7 @@ defmodule Realworld.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Start the PubSub system
-      {Phoenix.PubSub, name: Realworld.PubSub}
-      # Start a worker by calling: Realworld.Worker.start_link(arg)
-      # {Realworld.Worker, arg}
-    ]
+    children = []
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Realworld.Supervisor)
   end

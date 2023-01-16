@@ -36,7 +36,8 @@ defmodule Realworld.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix_pubsub, "~> 2.0"}
+      {:ash, "~> 2.5"},
+      {:elixir_sense, github: "elixir-lsp/elixir_sense", only: [:dev, :test]}
     ]
   end
 
