@@ -41,10 +41,13 @@ config :phoenix, :json_library, Jason
 config :ash, :use_all_identities_in_manage_relationship?, false
 
 config :realworld,
-  ash_apis: [Realworld.Support]
+  ash_apis: [Realworld.Support],
+  ecto_repos: [Realworld.Repo],
+  port: 4002
 
-config :realworld,
-  ecto_repos: [Realworld.Repo]
+config :mime, :types, %{
+  "application/vnd.api+json" => ["json"]
+}
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

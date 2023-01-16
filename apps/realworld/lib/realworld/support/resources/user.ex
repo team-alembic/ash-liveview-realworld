@@ -1,6 +1,7 @@
 defmodule Realworld.Support.User do
   use Ash.Resource,
-      data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshJsonApi.Resource]
 
   postgres do
     table "users"
@@ -15,5 +16,15 @@ defmodule Realworld.Support.User do
     uuid_primary_key :id
 
     attribute :email, :string
+  end
+
+  json_api do
+    type "user"
+
+    routes do
+      base("/users")
+
+      index(:read)
+    end
   end
 end
