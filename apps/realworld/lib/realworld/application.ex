@@ -1,13 +1,20 @@
 defmodule Realworld.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  @moduledoc false
-
   use Application
+  require Logger
+
+  alias Realworld.{Repo, Endpoint}
 
   @impl true
   def start(_type, _args) do
-    children = []
+    port = Application.get_env(:realworld, :port)
+
+    children = [
+      Repo,
+      {Plug.Cowboy, scheme: :http, plug: Endpoint, options: [port: port]},
+      {AshAuthentication.Supervisor, otp_app: :realworld}
+    ]
+
+    Logger.info("Running Realworld.Endpoint with cowboy at port #{port}")
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Realworld.Supervisor)
   end

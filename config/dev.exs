@@ -62,3 +62,14 @@ config :phoenix, :plug_init_mode, :runtime
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
+
+
+# Configure your database
+config :realworld, Realworld.Repo,
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  database: "realworld_dev",
+  port: 5432,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
