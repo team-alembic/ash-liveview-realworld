@@ -24,13 +24,23 @@ defmodule Realworld.Support.Comment do
       change manage_relationship(:article_id, :article, type: :append)
       change manage_relationship(:user_id, :user, type: :append)
     end
+
+    read :comments_by_article do
+      argument :article_id, :uuid do
+        allow_nil? false
+      end
+
+      filter expr(article_id == ^arg(:article_id))
+    end
   end
 
   attributes do
     uuid_primary_key :id
+
     attribute :body, :string do
       allow_nil? false
     end
+
     create_timestamp :created_at
     update_timestamp :updated_at
   end
