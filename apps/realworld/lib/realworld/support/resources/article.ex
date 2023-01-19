@@ -1,7 +1,6 @@
 defmodule Realworld.Support.Article do
   use Ash.Resource,
-    data_layer: AshPostgres.DataLayer,
-    extensions: [AshJsonApi.Resource]
+    data_layer: AshPostgres.DataLayer
 
   postgres do
     table "articles"
