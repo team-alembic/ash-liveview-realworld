@@ -6,5 +6,6 @@ defmodule Realworld.Support.Registry do
 
   entries do
     entry Realworld.Support.User
+    entry Realworld.Support.Article
   end
 end
