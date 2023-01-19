@@ -34,13 +34,4 @@ defmodule Realworld.Support.Article do
     end
   end
 
-  json_api do
-    type "article"
-
-    routes do
-      base("/articles")
-
-      index(:read)
-    end
-  end
 end
