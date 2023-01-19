@@ -34,4 +34,7 @@ defmodule Realworld.Support.Article do
     end
   end
 
+  relationships do
+    belongs_to :user, Realworld.Support.User
+  end
 end
