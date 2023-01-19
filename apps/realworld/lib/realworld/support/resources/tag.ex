@@ -9,21 +9,6 @@ defmodule Realworld.Support.Tag do
 
   actions do
     defaults [:create, :read, :destroy]
-
-    #   create :add_tags_to_article do
-    #     accept [:body]
-
-    #     argument :article_id, :uuid do
-    #       allow_nil? false
-    #     end
-
-    #     argument :user_id, :uuid do
-    #       allow_nil? false
-    #     end
-
-    #     change manage_relationship(:article_id, :article, type: :append)
-    #     change manage_relationship(:user_id, :user, type: :append)
-    #   end
   end
 
   attributes do
