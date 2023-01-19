@@ -16,9 +16,9 @@ defmodule Realworld.Controller.UserController do
 
         {:ok, %{user: user}}
       else
-        {:error, error} ->
-          Logger.warn("User registration fail", error)
-          {:unprocessable_entity, error}
+        {:error, %Ash.Error.Invalid{} = errors} ->
+          result = %{errors: parse_errors(errors)}
+          {:unprocessable_entity, result}
       end
 
     conn
