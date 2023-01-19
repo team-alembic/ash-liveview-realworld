@@ -5,6 +5,9 @@ defmodule Realworld.Endpoint do
   plug(Plug.Logger, log: :debug)
   plug(Plug.RequestId)
 
+  plug(:match)
+  plug(:dispatch)
+
   forward("/api/users", to: Realworld.Controller.UserController)
 
   @impl Plug.ErrorHandler

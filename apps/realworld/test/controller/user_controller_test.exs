@@ -109,14 +109,16 @@ defmodule UserControllerTest do
       conn(:post, "", params)
       |> put_req_header("content-type", "application/json")
 
+    conn2 = UserController.call(conn2, @opts)
+
     response = %{
       errors: %{
-        email: ["can't be empty"]
+        email: ["has already been taken"]
       }
     }
 
-    assert conn.state == :sent
-    assert conn.status == 422
+    assert conn2.state == :sent
+    assert conn2.status == 422
     assert conn2.resp_body == response |> Jason.encode!()
   end
 
@@ -152,14 +154,16 @@ defmodule UserControllerTest do
       conn(:post, "", params2)
       |> put_req_header("content-type", "application/json")
 
+    conn2 = UserController.call(conn2, @opts)
+
     response = %{
       errors: %{
-        username: ["can't be empty"]
+        username: ["has already been taken"]
       }
     }
 
-    assert conn.state == :sent
-    assert conn.status == 422
+    assert conn2.state == :sent
+    assert conn2.status == 422
     assert conn2.resp_body == response |> Jason.encode!()
   end
 end
