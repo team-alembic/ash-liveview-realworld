@@ -35,5 +35,11 @@ defmodule Realworld.Support.Article do
 
   relationships do
     belongs_to :user, Realworld.Support.User
+
+    many_to_many :tag_list, Realworld.Support.Tag do
+      through Realworld.Support.ArticleTag
+      source_attribute_on_join_resource :article_id
+      destination_attribute_on_join_resource :tag_id
+    end
   end
 end
