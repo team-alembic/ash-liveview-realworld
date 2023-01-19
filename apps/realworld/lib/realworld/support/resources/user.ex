@@ -1,7 +1,6 @@
 defmodule Realworld.Support.User do
   use Ash.Resource,
-    data_layer: AshPostgres.DataLayer,
-    extensions: [AshJsonApi.Resource]
+    data_layer: AshPostgres.DataLayer
 
   postgres do
     table "users"
@@ -9,22 +8,19 @@ defmodule Realworld.Support.User do
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    create :registration do
+      accept [:username, :email, :password]
+    end
   end
 
   attributes do
     uuid_primary_key :id
 
+    attribute :username, :string
     attribute :email, :string
-  end
-
-  json_api do
-    type "user"
-
-    routes do
-      base("/users")
-
-      index(:read)
-    end
+    attribute :password, :string
+    attribute :bio, :string
+    attribute :image, :string
+    attribute :token, :string
   end
 end

@@ -1,5 +1,5 @@
 defmodule Realworld.Support do
-  use Ash.Api, extensions: [AshJsonApi.Api]
+  use Ash.Api
 
   resources do
     registry Realworld.Support.Registry
