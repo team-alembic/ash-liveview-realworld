@@ -2,10 +2,13 @@ defmodule Realworld.Endpoint do
   use Plug.Router
   use Plug.ErrorHandler
 
+  plug(Plug.Logger, log: :debug)
+  plug(Plug.RequestId)
+
   plug(:match)
   plug(:dispatch)
 
-  forward("/api", to: Realworld.Support.Router)
+  forward("/api/users", to: Realworld.Controller.UserController)
 
   @impl Plug.ErrorHandler
   def handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
