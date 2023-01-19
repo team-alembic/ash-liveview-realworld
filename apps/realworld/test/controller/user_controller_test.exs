@@ -1,5 +1,5 @@
 defmodule UserControllerTest do
-  use ExUnit.Case, async: true
+  use Realworld.RepoCase
   use Plug.Test
 
   alias Realworld.Controller.UserController

@@ -10,8 +10,6 @@ defmodule Realworld.Support.User do
   actions do
     create :registration do
       accept [:username, :email, :password]
-      upsert_identity :email
-      upsert_identity :username
     end
   end
 
@@ -24,6 +22,11 @@ defmodule Realworld.Support.User do
     attribute :bio, :string
     attribute :image, :string
     attribute :token, :string
+  end
+
+  identities do
+    identity :unique_email, [:email]
+    identity :unique_username, [:username]
   end
 
   validations do
