@@ -7,5 +7,6 @@ defmodule Realworld.Support.Registry do
   entries do
     entry Realworld.Support.User
     entry Realworld.Support.Article
+    entry Realworld.Support.Comment
   end
 end
