@@ -10,5 +10,6 @@ defmodule Realworld.Support.Registry do
     entry Realworld.Support.Tag
     entry Realworld.Support.ArticleTag
     entry Realworld.Support.Comment
+    entry Realworld.Support.Token
   end
 end

@@ -50,9 +50,14 @@ defmodule Realworld.Controller do
           |> case do
             %Ash.Error.Changes.InvalidAttribute{field: field, message: message, vars: _vars} ->
               {field, message}
+
+            %Ash.Error.Changes.Required{field: field} ->
+              {field, "must be present"}
           end
         end)
         |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+        |> Enum.map(fn {attr, msgs} -> {attr, Enum.uniq(msgs)} end)
+        |> Map.new()
       end
     end
   end

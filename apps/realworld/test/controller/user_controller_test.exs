@@ -28,11 +28,19 @@ defmodule UserControllerTest do
     assert conn.state == :sent
     assert conn.status == 200
 
-    response = %{
-      user: %{bio: nil, email: user.email, image: nil, token: nil, username: user.username}
+    response_expected = %{
+      user: %{
+        email: user.email,
+        username: user.username,
+        bio: nil,
+        image: nil
+      }
     }
 
-    assert conn.resp_body == response |> Jason.encode!()
+    response = conn.resp_body |> Jason.decode!(keys: :atoms)
+
+    match?(^response, response_expected)
+    refute(is_nil(response.user.token))
   end
 
   test "fail without params" do
@@ -55,7 +63,8 @@ defmodule UserControllerTest do
   test "fail with invalid params" do
     user = %{
       email: "",
-      password: ""
+      password: "",
+      username: ""
     }
 
     params =
@@ -76,7 +85,8 @@ defmodule UserControllerTest do
     response = %{
       errors: %{
         email: ["must be present"],
-        password: ["must be present"]
+        password: ["must be present"],
+        username: ["must be present"]
       }
     }
 
@@ -165,5 +175,57 @@ defmodule UserControllerTest do
     assert conn2.state == :sent
     assert conn2.status == 422
     assert conn2.resp_body == response |> Jason.encode!()
+  end
+
+  test "successful login" do
+    user = %{
+      username: "User",
+      email: "email@email.com",
+      password: "password"
+    }
+
+    params =
+      %{
+        user: user
+      }
+      |> Jason.encode!()
+
+    conn =
+      conn(:post, "", params)
+      |> put_req_header("content-type", "application/json")
+
+    conn = UserController.call(conn, @opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+
+    params =
+      %{
+        user: %{email: user.email, password: user.password}
+      }
+      |> Jason.encode!()
+
+    conn =
+      conn(:post, "/login", params)
+      |> put_req_header("content-type", "application/json")
+
+    conn = UserController.call(conn, @opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+
+    response_expected = %{
+      user: %{
+        email: user.email,
+        username: user.username,
+        bio: nil,
+        image: nil
+      }
+    }
+
+    response = conn.resp_body |> Jason.decode!(keys: :atoms)
+
+    match?(^response, response_expected)
+    refute(is_nil(response.user.token))
   end
 end

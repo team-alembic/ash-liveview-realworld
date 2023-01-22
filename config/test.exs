@@ -13,7 +13,6 @@ config :logger, level: :warn
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
-
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
@@ -26,3 +25,12 @@ config :realworld, Realworld.Repo,
   database: "realworld_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
+
+# JWT Secret
+config :ash_authentication,
+  authentication: [
+    tokens: [
+      signing_secret:
+        "arb_9Z_yUe1kM@*-fJK=B}2W!RZ?C.iiK>@-:Un9-@UoCWyV!0Yvy+ErBU7}+gPs}V8k0rg!2D:fAr"
+    ]
+  ]
