@@ -1,7 +1,13 @@
 defmodule Realworld.Controller do
-  defmacro __using__(_opts) do
+  defmacro __using__(opts) do
     quote do
       use Plug.Router
+
+      import Realworld.Plug.Auth
+
+      %{auth?: auth} =
+        unquote(opts)
+        |> Enum.into(%{auth?: true})
 
       plug(Plug.Parsers,
         parsers: [:urlencoded, :multipart, :json],
@@ -10,6 +16,11 @@ defmodule Realworld.Controller do
       )
 
       plug(:load_user)
+
+      if auth do
+        plug(:require_auth)
+      end
+
       plug(:match)
       plug(:dispatch)
 
@@ -61,16 +72,37 @@ defmodule Realworld.Controller do
         |> Map.new()
       end
 
+      def parse_errors(%AshAuthentication.Errors.AuthenticationFailed{}),
+        do: %{
+          email: ["is invalid"],
+          password: ["is invalid"]
+        }
+
       def get_current_user(conn) do
         conn.assigns
-        |> IO.inspect()
         |> case do
-          %{user: user} ->
+          %{current_user: user} ->
             {:ok, user}
 
           _ ->
             {:error, :unauthorized}
         end
+      end
+
+      def require_auth(%Plug.Conn{assigns: %{current_user: user}} = conn, _opts)
+          when not is_nil(user),
+          do: conn
+
+      def require_auth(conn, _opts) do
+        error = %{
+          errors: %{
+            authorization: ["is invalid"]
+          }
+        }
+
+        conn
+        |> send_json({:unauthorized, error})
+        |> halt()
       end
     end
   end

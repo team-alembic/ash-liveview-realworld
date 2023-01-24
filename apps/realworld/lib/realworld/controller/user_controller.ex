@@ -1,5 +1,5 @@
 defmodule Realworld.Controller.UserController do
-  use Realworld.Controller
+  use Realworld.Controller, auth?: false
 
   require Logger
 
@@ -19,7 +19,7 @@ defmodule Realworld.Controller.UserController do
 
         {:ok, %{user: user}}
       else
-        {:error, %Ash.Error.Invalid{} = errors} ->
+        {:error, errors} ->
           result = %{errors: parse_errors(errors)}
           {:unprocessable_entity, result}
       end
@@ -37,46 +37,6 @@ defmodule Realworld.Controller.UserController do
              AshAuthentication.Strategy.action(strategy, :sign_in, data) do
         user = resource |> Map.take(@public_attr)
         user = user |> Map.put(:token, resource.__metadata__.token)
-
-        {:ok, %{user: user}}
-      else
-        {:error, errors} ->
-          result = %{errors: parse_errors(errors)}
-          {:unprocessable_entity, result}
-      end
-
-    conn
-    |> send_json({status, result})
-  end
-
-  get "" do
-    {status, result} =
-      with {:ok, resource} <- conn |> get_current_user() do
-        resource |> IO.inspect()
-        user = resource |> Map.take(@public_attr)
-
-        {:ok, %{user: user}}
-      else
-        {:error, errors} ->
-          result = %{errors: parse_errors(errors)}
-          {:unprocessable_entity, result}
-      end
-
-    conn
-    |> send_json({status, result})
-  end
-
-  put "" do
-    {status, result} =
-      with {:ok, data} <- conn |> get_body("user"),
-           {:ok, resource} <- conn |> get_current_user(),
-           {:ok, resource_updated} <-
-             resource
-             |> Ash.Changeset.for_update(:update_profile, data)
-             |> Realworld.Support.update() do
-        resource_updated |> IO.inspect()
-
-        user = resource_updated |> Map.take(@public_attr)
 
         {:ok, %{user: user}}
       else

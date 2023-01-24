@@ -73,10 +73,6 @@ defmodule Realworld.Support.User do
       policy action_type(:create) do
         authorize_if AshAuthentication.Checks.AshAuthenticationInteraction
       end
-
-      # policy always() do
-      #   authorize_if always()
-      # end
     end
   end
 

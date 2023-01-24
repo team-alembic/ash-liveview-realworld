@@ -2,18 +2,17 @@ defmodule Realworld.Plug.Auth do
   alias AshAuthentication.{Info, Jwt, TokenResource}
   alias Plug.Conn
 
-  def load_user(conn, otp_app) do
-      with "Token "+ token <- conn |> Conn.get_req_header("authorization"),
-          {:ok, %{"sub" => subject, "jti" => jti}, resource} <- Jwt.verify(token, otp_app),
-           :ok <- validate_token(resource, jti),
-           {:ok, user} <- AshAuthentication.subject_to_user(subject, resource),
-           {:ok, subject_name} <- Info.authentication_subject_name(resource),
-           current_subject_name <- current_subject_name(subject_name) do
-        conn
-        |> Conn.assign(current_subject_name, user)
-      else
-        _ -> conn
-      end
+  def load_user(conn, _opts) do
+    with {:ok, token} <- conn |> get_token(),
+         {:ok, %{"sub" => subject, "jti" => jti}, resource} <- Jwt.verify(token, :realworld),
+         :ok <- validate_token(resource, jti),
+         {:ok, user} <- AshAuthentication.subject_to_user(subject, resource),
+         {:ok, subject_name} <- Info.authentication_subject_name(resource),
+         current_subject_name <- current_subject_name(subject_name) do
+      conn
+      |> Conn.assign(current_subject_name, user)
+    else
+      _ -> conn
     end
   end
 
@@ -34,4 +33,13 @@ defmodule Realworld.Plug.Auth do
 
   defp current_subject_name(subject_name) when is_atom(subject_name),
     do: String.to_atom("current_#{subject_name}")
+
+  defp get_token(conn) do
+    conn
+    |> Conn.get_req_header("authorization")
+    |> case do
+      ["Token " <> token] -> {:ok, token}
+      [] -> {:error, :no_authorization}
+    end
+  end
 end
