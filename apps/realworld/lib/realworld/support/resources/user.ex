@@ -1,7 +1,8 @@
 defmodule Realworld.Support.User do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshAuthentication]
+    extensions: [AshAuthentication],
+    authorizers: [Ash.Policy.Authorizer]
 
   alias Realworld.Support.Token
 
@@ -17,6 +18,10 @@ defmodule Realworld.Support.User do
       allow_nil_input [:hashed_password]
       change AshAuthentication.Strategy.Password.HashPasswordChange
       change AshAuthentication.GenerateTokenChange
+    end
+
+    update :update_profile do
+      accept [:email, :bio, :image]
     end
   end
 
@@ -57,6 +62,21 @@ defmodule Realworld.Support.User do
       token_resource(Token)
       signing_algorithm("HS256")
       signing_secret(&get_config/2)
+      require_token_presence_for_authentication?(true)
+    end
+
+    policies do
+      policy action_type(:read) do
+        authorize_if AshAuthentication.Checks.AshAuthenticationInteraction
+      end
+
+      policy action_type(:create) do
+        authorize_if AshAuthentication.Checks.AshAuthenticationInteraction
+      end
+
+      # policy always() do
+      #   authorize_if always()
+      # end
     end
   end
 

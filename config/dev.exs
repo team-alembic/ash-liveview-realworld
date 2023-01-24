@@ -81,3 +81,7 @@ config :ash_authentication,
         "arb_9Z_yUe1kM@*-fJK=B}2W!RZ?C.iiK>@-:Un9-@UoCWyV!0Yvy+ErBU7}+gPs}V8k0rg!2D:fAr"
     ]
   ]
+
+config :ash, :policies,
+  show_policy_breakdowns?: true,
+  log_successful_policy_breakdowns: :error

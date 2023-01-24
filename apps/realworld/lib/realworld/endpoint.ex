@@ -11,6 +11,7 @@ defmodule Realworld.Endpoint do
   plug(:dispatch)
 
   forward("/api/users", to: UserController)
+  forward("/api/user", to: UserController)
 
   @impl Plug.ErrorHandler
   def handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do

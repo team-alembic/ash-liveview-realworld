@@ -9,6 +9,7 @@ defmodule Realworld.Controller do
         json_decoder: Jason
       )
 
+      plug(:load_user)
       plug(:match)
       plug(:dispatch)
 
@@ -58,6 +59,18 @@ defmodule Realworld.Controller do
         |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
         |> Enum.map(fn {attr, msgs} -> {attr, Enum.uniq(msgs)} end)
         |> Map.new()
+      end
+
+      def get_current_user(conn) do
+        conn.assigns
+        |> IO.inspect()
+        |> case do
+          %{user: user} ->
+            {:ok, user}
+
+          _ ->
+            {:error, :unauthorized}
+        end
       end
     end
   end
