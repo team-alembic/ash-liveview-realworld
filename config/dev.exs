@@ -63,7 +63,6 @@ config :phoenix, :plug_init_mode, :runtime
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
 
-
 # Configure your database
 config :realworld, Realworld.Repo,
   username: "postgres",
@@ -73,3 +72,16 @@ config :realworld, Realworld.Repo,
   port: 5432,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
+
+# JWT Secret
+config :ash_authentication,
+  authentication: [
+    tokens: [
+      signing_secret:
+        "arb_9Z_yUe1kM@*-fJK=B}2W!RZ?C.iiK>@-:Un9-@UoCWyV!0Yvy+ErBU7}+gPs}V8k0rg!2D:fAr"
+    ]
+  ]
+
+config :ash, :policies,
+  show_policy_breakdowns?: true,
+  log_successful_policy_breakdowns: :error

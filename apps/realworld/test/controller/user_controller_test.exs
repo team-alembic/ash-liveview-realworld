@@ -3,6 +3,7 @@ defmodule UserControllerTest do
   use Plug.Test
 
   alias Realworld.Controller.UserController
+  alias Realworld.Support.User
 
   @opts UserController.init([])
 
@@ -19,43 +20,52 @@ defmodule UserControllerTest do
       }
       |> Jason.encode!()
 
-    conn =
+    request =
       conn(:post, "", params)
       |> put_req_header("content-type", "application/json")
 
-    conn = UserController.call(conn, @opts)
+    result = UserController.call(request, @opts)
 
-    assert conn.state == :sent
-    assert conn.status == 200
+    assert result.state == :sent
+    assert result.status == 200
 
-    response = %{
-      user: %{bio: nil, email: user.email, image: nil, token: nil, username: user.username}
-    }
+    response = result.resp_body |> Jason.decode!(keys: :atoms)
 
-    assert conn.resp_body == response |> Jason.encode!()
+    refute(is_nil(response.user.token))
+
+    email = user.email
+    username = user.username
+
+    assert match?(
+             %{
+               user: %{email: ^email, username: ^username, bio: nil, image: nil, token: _}
+             },
+             response
+           )
   end
 
   test "fail without params" do
-    conn =
+    request =
       conn(:post, "")
       |> put_req_header("content-type", "application/json")
 
-    conn = UserController.call(conn, @opts)
+    result = UserController.call(request, @opts)
 
-    assert conn.state == :sent
-    assert conn.status == 422
+    assert result.state == :sent
+    assert result.status == 422
 
     response = %{
       errors: %{user: ["can't be empty"]}
     }
 
-    assert conn.resp_body == response |> Jason.encode!()
+    assert result.resp_body == response |> Jason.encode!()
   end
 
   test "fail with invalid params" do
     user = %{
       email: "",
-      password: ""
+      password: "",
+      username: ""
     }
 
     params =
@@ -64,23 +74,24 @@ defmodule UserControllerTest do
       }
       |> Jason.encode!()
 
-    conn =
+    request =
       conn(:post, "", params)
       |> put_req_header("content-type", "application/json")
 
-    conn = UserController.call(conn, @opts)
+    result = UserController.call(request, @opts)
 
-    assert conn.state == :sent
-    assert conn.status == 422
+    assert result.state == :sent
+    assert result.status == 422
 
     response = %{
       errors: %{
         email: ["must be present"],
-        password: ["must be present"]
+        password: ["must be present"],
+        username: ["must be present"]
       }
     }
 
-    assert conn.resp_body == response |> Jason.encode!()
+    assert result.resp_body == response |> Jason.encode!()
   end
 
   test "fail with duplicated email" do
@@ -90,26 +101,20 @@ defmodule UserControllerTest do
       password: "password"
     }
 
+    {:ok, strategy} = AshAuthentication.Info.strategy(User, :password)
+    {:ok, _resource} = AshAuthentication.Strategy.action(strategy, :register, user)
+
     params =
       %{
         user: user
       }
       |> Jason.encode!()
 
-    conn =
+    request =
       conn(:post, "", params)
       |> put_req_header("content-type", "application/json")
 
-    conn = UserController.call(conn, @opts)
-
-    assert conn.state == :sent
-    assert conn.status == 200
-
-    conn2 =
-      conn(:post, "", params)
-      |> put_req_header("content-type", "application/json")
-
-    conn2 = UserController.call(conn2, @opts)
+    result = UserController.call(request, @opts)
 
     response = %{
       errors: %{
@@ -117,9 +122,9 @@ defmodule UserControllerTest do
       }
     }
 
-    assert conn2.state == :sent
-    assert conn2.status == 422
-    assert conn2.resp_body == response |> Jason.encode!()
+    assert result.state == :sent
+    assert result.status == 422
+    assert result.resp_body == response |> Jason.encode!()
   end
 
   test "fail with duplicated username" do
@@ -129,32 +134,20 @@ defmodule UserControllerTest do
       password: "password"
     }
 
+    {:ok, strategy} = AshAuthentication.Info.strategy(User, :password)
+    {:ok, _resource} = AshAuthentication.Strategy.action(strategy, :register, user)
+
     params =
-      %{
-        user: user
-      }
-      |> Jason.encode!()
-
-    conn =
-      conn(:post, "", params)
-      |> put_req_header("content-type", "application/json")
-
-    conn = UserController.call(conn, @opts)
-
-    assert conn.state == :sent
-    assert conn.status == 200
-
-    params2 =
       %{
         user: %{user | email: "email@email_2.com"}
       }
       |> Jason.encode!()
 
-    conn2 =
-      conn(:post, "", params2)
+    request =
+      conn(:post, "", params)
       |> put_req_header("content-type", "application/json")
 
-    conn2 = UserController.call(conn2, @opts)
+    result = UserController.call(request, @opts)
 
     response = %{
       errors: %{
@@ -162,8 +155,80 @@ defmodule UserControllerTest do
       }
     }
 
-    assert conn2.state == :sent
-    assert conn2.status == 422
-    assert conn2.resp_body == response |> Jason.encode!()
+    assert result.state == :sent
+    assert result.status == 422
+    assert result.resp_body == response |> Jason.encode!()
+  end
+
+  test "successful login" do
+    user = %{
+      username: "User",
+      email: "email@email.com",
+      password: "password"
+    }
+
+    {:ok, strategy} = AshAuthentication.Info.strategy(User, :password)
+
+    {:ok, _resource} = AshAuthentication.Strategy.action(strategy, :register, user)
+
+    params =
+      %{
+        user: %{email: user.email, password: user.password}
+      }
+      |> Jason.encode!()
+
+    conn =
+      conn(:post, "/login", params)
+      |> put_req_header("content-type", "application/json")
+
+    conn = UserController.call(conn, @opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+
+    response = conn.resp_body |> Jason.decode!(keys: :atoms)
+
+    refute(is_nil(response.user.token))
+
+    email = user.email
+    username = user.username
+
+    assert match?(
+             %{
+               user: %{email: ^email, username: ^username, bio: nil, image: nil, token: _}
+             },
+             response
+           )
+  end
+
+  test "fail login" do
+    params =
+      %{
+        user: %{
+          email: "email@email.com",
+          password: "password"
+        }
+      }
+      |> Jason.encode!()
+
+    request =
+      conn(:post, "/login", params)
+      |> put_req_header("content-type", "application/json")
+
+    result = UserController.call(request, @opts)
+
+    assert result.state == :sent
+    assert result.status == 422
+
+    response_expected = %{
+      errors: %{
+        email: ["is invalid"],
+        password: ["is invalid"]
+      }
+    }
+
+    response = result.resp_body |> Jason.decode!(keys: :atoms)
+
+    assert response === response_expected
   end
 end

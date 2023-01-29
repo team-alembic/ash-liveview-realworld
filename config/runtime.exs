@@ -49,4 +49,18 @@ if config_env() == :prod do
   config :realworld, Realworld.Repo,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+
+  # JWT Secret
+  signing_secret =
+    System.get_env("SIGNING_SECRET") ||
+      raise """
+      environment variable SIGNING_SECRET is missing.
+      """
+
+  config :ash_authentication,
+    authentication: [
+      tokens: [
+        signing_secret: signing_secret
+      ]
+    ]
 end
